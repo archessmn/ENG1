@@ -20,7 +20,7 @@ jobs:
       - name: Install dependencies
         uses: bahmutov/npm-install@v1
         with:
-          working_directory: website
+          working-directory: website
 
       - name: Build project
         working-directory: ./website
