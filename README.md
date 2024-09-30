@@ -2,9 +2,9 @@
 
 ## Members
 
-Tommy Cavill
-Perry Cheng
-Alex Chestnutt
-Abbie Ellett
-Natalie Kuper
-Mia Moir
+- Tommy Cavill
+- Perry Cheng
+- Alex Chestnutt
+- Abbie Ellett
+- Natalie Kuper
+- Mia Moir
