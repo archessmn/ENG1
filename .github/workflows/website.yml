@@ -26,6 +26,11 @@ jobs:
         working-directory: ./website
         run: npm run build
 
+      - name: Add CNAME for deployment
+        run: |
+          touch website/dist/CNAME
+          echo "eng1.archess.mn" >> website/dist/CNAME
+
       - name: Upload production-ready build files
         uses: actions/upload-artifact@v3
         with:
