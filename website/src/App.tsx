@@ -4,13 +4,40 @@ import "@mantine/core/styles.css";
 
 import { MantineProvider, Title } from "@mantine/core";
 import { AppLayout } from "./_components/AppShell";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { WeekList } from "./pages/weeks/page";
+import Week1 from "./pages/weeks/Week1";
 
 export default function App() {
   return (
     <MantineProvider defaultColorScheme="dark">
-      <AppLayout>
-        <Title>ENG1 Cohort 2 Group 3</Title>
-      </AppLayout>
+      <BrowserRouter>
+        <Routes>
+          <Route
+            path="/"
+            element={<AppLayout />}
+          >
+            <Route
+              path=""
+              element={<Title>Hello World!</Title>}
+            />
+            <Route
+              path="test"
+              element={<Title>Test Page</Title>}
+            />
+            <Route path="weeks">
+              <Route
+                index
+                element={<WeekList />}
+              />
+              <Route
+                path="1"
+                element={<Week1 />}
+              />
+            </Route>
+          </Route>
+        </Routes>
+      </BrowserRouter>
     </MantineProvider>
   );
 }
