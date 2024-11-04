@@ -11,12 +11,15 @@ public class GridUtils {
     public static void drawGrid(ShapeRenderer gridRenderer) {
         gridRenderer.begin(ShapeRenderer.ShapeType.Line);
 
+        float gridWidth = (VIEWPORT_WIDTH / 16f);
+        float gridHeight = (VIEWPORT_HEIGHT / 9f);
+
         for (int v = 1; v < 9; v++) {
-            gridRenderer.line(0, 60 * v,960, 60 * v);
+            gridRenderer.line(0, gridWidth * v, VIEWPORT_WIDTH, gridWidth * v);
         }
 
         for (int h = 1; h < 16; h++) {
-            gridRenderer.line(60 * h, 0,60 * h, 540);
+            gridRenderer.line(gridHeight * h, 0,gridHeight * h, VIEWPORT_HEIGHT);
         }
 
         gridRenderer.end();

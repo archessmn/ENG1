@@ -3,12 +3,11 @@ package io.github.archessmn.ENG1;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.audio.Sound;
-import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
@@ -16,6 +15,8 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
+import io.github.archessmn.ENG1.Buildings.*;
+import io.github.archessmn.ENG1.Buildings.Building;
 import io.github.archessmn.ENG1.Util.GridUtils;
 
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
@@ -23,30 +24,36 @@ public class Main extends ApplicationAdapter {
     public static final Integer VIEWPORT_WIDTH = 960;
     public static final Integer VIEWPORT_HEIGHT = 540;
 
+    World world;
+
     private SpriteBatch batch;
-    private Texture image;
-    private Texture pipe;
+
+    AssetManager assetManager;
 
     ShapeRenderer gridRenderer;
     ShapeRenderer shapeRenderer;
 
-    Sound pipeDrop;
-    Sprite logo;
-    Sprite pipeSprite;
     FitViewport viewport;
 
     Vector2 touchPos;
     Vector2 unprojectedTouchPos;
 
-    Array<Sprite> dropSprites;
+//    Array<Sprite> logoSprites;
+
+//    Array<Sprite> dropSprites;
+
+    Array<Building> draggableBuildings;
+    Array<Building> buildings;
 
     float dropTimer;
 
-    Rectangle logoRectangle;
-    Rectangle dropRectangle;
+    float gameTimer;
+
+    Rectangle buildingRectangle;
+//    Rectangle dropRectangle;
     BitmapFont font;
     Boolean isClicked = false;
-    Boolean isLogoCLicked = false;
+    Integer buildingClicked = -1;
 
     Boolean paused = false;
 
@@ -54,36 +61,34 @@ public class Main extends ApplicationAdapter {
 
     @Override
     public void create() {
-        batch = new SpriteBatch();
-        image = new Texture("libgdx.png");
-        pipe = new Texture("pipe.png");
-        pipeDrop = Gdx.audio.newSound(Gdx.files.internal("pipe-drop.mp3"));
+        world = new World(VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
 
-        logo = new Sprite(image);
-        pipeSprite = new Sprite(pipe);
-        logo.setSize(60,60);
+        batch = new SpriteBatch();
+
+        assetManager = world.assetManager;
 
         touchPos = new Vector2();
         unprojectedTouchPos = new Vector2();
 
-        dropSprites = new Array<>();
+        buildings = new Array<>();
+        draggableBuildings = new Array<>();
 
-        gridRenderer = new ShapeRenderer();
-        shapeRenderer = new ShapeRenderer();
+        draggableBuildings.add(new GymBuilding(world, 0, 0));
+        draggableBuildings.add(new HallsBuilding(world, 60, 0));
+        draggableBuildings.add(new LectureHallBuilding(world, 120, 0));
+        draggableBuildings.add(new OfficeBuilding(world, 180, 0));
+        draggableBuildings.add(new PiazzaBuilding(world, 240, 0));
 
-        viewport = new FitViewport(VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
+        gameTimer = 0f;
 
-        logoRectangle = new Rectangle();
-        dropRectangle = new Rectangle();
+        shapeRenderer = world.shapeRenderer;
+        gridRenderer = world.gridRenderer;
 
-        FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("ui/Arial.ttf"));
-        FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
-        parameter.size = (int)(0.05f * Gdx.graphics.getHeight());
-        font = generator.generateFont(parameter);
-        font.getData().setScale(viewport.getWorldHeight() / Gdx.graphics.getHeight());
-        generator.dispose();
+        viewport = world.viewport;
 
-        createDroplet();
+        buildingRectangle = new Rectangle();
+
+        font = world.font;
     }
 
     @Override
@@ -99,11 +104,11 @@ public class Main extends ApplicationAdapter {
         float worldWidth = viewport.getWorldWidth();
         float worldHeight = viewport.getWorldHeight();
 
-        Sprite dropSprite = new Sprite(pipeSprite);
-        dropSprite.setSize(dropWidth, dropHeight);
-        dropSprite.setX(MathUtils.random(0f, worldWidth - dropWidth));
-        dropSprite.setY(worldHeight);
-        dropSprites.add(dropSprite);
+//        Sprite dropSprite = new Sprite(hallsSprite);
+//        dropSprite.setSize(dropWidth, dropHeight);
+//        dropSprite.setX(MathUtils.random(0f, worldWidth - dropWidth));
+//        dropSprite.setY(worldHeight);
+//        dropSprites.add(dropSprite);
     }
 
     @Override
@@ -115,9 +120,9 @@ public class Main extends ApplicationAdapter {
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) paused = !paused;
 
         if (paused) {
-            isLogoCLicked = false;
+            buildingClicked = -1;
             return;
-        };
+        }
 
         touchPos.set(Gdx.input.getX(), Gdx.input.getY());
         unprojectedTouchPos.set(viewport.unproject(touchPos));
@@ -125,18 +130,26 @@ public class Main extends ApplicationAdapter {
         isClicked = Gdx.input.isTouched();
 
         if (Gdx.input.justTouched()) {
-            isLogoCLicked = logoRectangle.contains(unprojectedTouchPos);
-        } else if (!isClicked) {
-            isLogoCLicked = false;
+            for (int i = draggableBuildings.size - 1; i >= 0; i--) {
+                Building building = draggableBuildings.get(i);
+//                Sprite sprite = building.sprite;
 
-            Vector2 gridCoords = GridUtils.getGridCoords(logo.getX() + logo.getWidth() / 2, logo.getY() + logo.getHeight() / 2);
+                if (building.getBounds().contains(unprojectedTouchPos)) {
+                    buildings.add(building.makeCopy());
+                    buildingClicked = buildings.size - 1;
+                    break;
+                }
+            }
+        } else if (!isClicked && buildingClicked != -1) {
+            Building building = buildings.get(buildingClicked);
 
-            logo.setCenter(gridCoords.x, gridCoords.y);
+            building.snapToGrid();
+
+            buildingClicked = -1;
         }
 
-
-        if (isLogoCLicked) {
-            logo.setCenter(touchPos.x, touchPos.y);
+        if (buildingClicked != -1) {
+            buildings.get(buildingClicked).setCenter(touchPos.x, touchPos.y);
         }
     }
 
@@ -146,72 +159,55 @@ public class Main extends ApplicationAdapter {
         float worldWidth = viewport.getWorldWidth();
         float worldHeight = viewport.getWorldHeight();
 
-        float logoWidth = logo.getWidth();
-        float logoHeight = logo.getHeight();
-
-        logo.setX(MathUtils.clamp(logo.getX(), 0, worldWidth - logoWidth));
-        logo.setY(MathUtils.clamp(logo.getY(), 0, worldHeight - logoHeight));
+        for (Building building : buildings) {
+            building.sprite.setX(MathUtils.clamp(building.x, 0, worldWidth - building.width));
+            building.sprite.setY(MathUtils.clamp(building.y, 0, worldHeight - building.height));
+        }
 
         float delta = Gdx.graphics.getDeltaTime();
 
-        logoRectangle.set(logo.getX(), logo.getY(), logoWidth, logoHeight);
-
-        // Loop through the sprites backwards to prevent out of bounds errors
-        for (int i = dropSprites.size - 1; i >= 0; i--) {
-            Sprite dropSprite = dropSprites.get(i); // Get the sprite from the list
-            float dropWidth = dropSprite.getWidth();
-            float dropHeight = dropSprite.getHeight();
-
-            dropSprite.translateY(-120f * delta);
-
-            dropRectangle.set(dropSprite.getX(), dropSprite.getY(), dropWidth, dropHeight);
-
-            // if the top of the drop goes below the bottom of the view, remove it
-            if (dropSprite.getY() < -dropHeight) dropSprites.removeIndex(i);
-            else if (logoRectangle.overlaps(dropRectangle)) { // Check if the bucket overlaps the drop
-                dropSprites.removeIndex(i); // Remove the drop
-                score += 1;
-                pipeDrop.play();
-            }
-        }
+        gameTimer += delta;
 
         dropTimer += delta; // Adds the current delta to the timer
         if (dropTimer > 1f) { // Check if it has been more than a second
             dropTimer = 0; // Reset the timer
-            createDroplet(); // Create the droplet
         }
     }
 
     private void draw() {
-        ScreenUtils.clear(0.15f, 0.15f, 0.2f, 1f);
+        ScreenUtils.clear(Color.OLIVE);
         viewport.apply();
-
-        float worldWidth = viewport.getWorldWidth();
-        float worldHeight = viewport.getWorldHeight();
 
         batch.setProjectionMatrix(viewport.getCamera().combined);
 
-        //Draw grid using util function
-        GridUtils.drawGrid(gridRenderer);
+        world.drawGrid();
 
         // Draw red outline for where the logo will snap to
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-        shapeRenderer.setColor(1f, 0, 0, 1f);
-        Vector2 logoCoords = GridUtils.getGridCoords(logo.getX() + logo.getWidth() / 2, logo.getY() + logo.getHeight() / 2);
-        shapeRenderer.rect(logoCoords.x - (logo.getWidth() / 2), logoCoords.y - (logo.getHeight() / 2), logoRectangle.width, logoRectangle.height);
+        shapeRenderer.setColor(Color.RED);
+        if (buildingClicked != -1) {
+            Building building = buildings.get(buildingClicked);
+            Vector2 buldingCoords = building.getGridCoords();
+            shapeRenderer.rect(buldingCoords.x - (building.width / 2), buldingCoords.y - (building.height / 2), building.width, building.height);
+        }
+
         shapeRenderer.end();
 
         batch.begin();
 
-        logo.draw(batch);
+        for (Building building : draggableBuildings) {
+            building.draw(batch);
+        }
 
-        for (Sprite dropSprite : dropSprites) {
-            dropSprite.draw(batch);
+        for (Building building : buildings) {
+            building.draw(batch);
         }
 
         font.draw(batch, String.format("Score: %d", score), 0, 520);
+        font.draw(batch, String.format("Time: %f", gameTimer), 0, 480);
         font.draw(batch, String.format("touch x: %f touch y: %f", touchPos.x, touchPos.y), 0, 440);
-        font.draw(batch, String.format("touch x: %f touch y: %f", logoRectangle.x, logoRectangle.y), 0, 400);
+        if (buildingClicked != -1) font.draw(batch, String.format("touch x: %f touch y: %f", buildings.get(buildingClicked).x, buildings.get(buildingClicked).y), 0, 400);
+        font.draw(batch, String.format("buildingClicked: %d", buildingClicked), 0, 360);
 
         if (paused) font.draw(batch, "Paused", 480, 400);
 
@@ -221,6 +217,6 @@ public class Main extends ApplicationAdapter {
     @Override
     public void dispose() {
         batch.dispose();
-        image.dispose();
+        assetManager.dispose();
     }
 }
