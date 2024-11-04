@@ -7,6 +7,7 @@ import { AppLayout } from "./_components/AppShell";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { WeekList } from "./pages/weeks/page";
 import Week1 from "./pages/weeks/Week1";
+import LicensePage from "./_components/LicensePage";
 
 export default function App() {
   return (
@@ -24,6 +25,10 @@ export default function App() {
             <Route
               path="test"
               element={<Title>Test Page</Title>}
+            />
+            <Route
+              path="licenses"
+              element={<LicensePage />}
             />
             <Route path="weeks">
               <Route

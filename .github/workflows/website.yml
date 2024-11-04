@@ -14,6 +14,13 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v3
 
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+      - name: Download Licenses
+        run: ./gradlew downloadLicenses
+      - name: Copy License Files
+        run: cp game/core/build/reports/license/license-dependency.json website/public/core-license-dependency.json && cp game/lwjgl3/build/reports/license/license-dependency.json website/public/lwjgl3-license-dependency.json
+
       - name: Setup Node
         uses: actions/setup-node@v3
 

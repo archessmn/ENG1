@@ -14,6 +14,10 @@ buildscript {
   }
 }
 
+plugins {
+  id "com.github.hierynomus.license-report" version"0.16.1" apply false
+}
+
 allprojects {
   apply plugin: 'eclipse'
   apply plugin: 'idea'
@@ -29,6 +33,7 @@ allprojects {
 
 configure(subprojects) {
   apply plugin: 'java-library'
+  apply plugin: 'com.github.hierynomus.license-report'
   sourceCompatibility = 17
 
   // From https://lyze.dev/2021/04/29/libGDX-Internal-Assets-List/
@@ -53,6 +58,20 @@ configure(subprojects) {
 
   compileJava {
     options.incremental = true
+  }
+
+  downloadLicenses {
+    ext.apacheTwo = license('Apache License, Version 2.0', 'https://www.apache.org/licenses/LICENSE-2.0.txt')
+    ext.lgpl = license('GNU Lesser General Public License (LGPL), Version 2.1', 'http://www.fsf.org/licensing/licenses/lgpl.txt')
+
+    includeProjectDependencies = true
+
+    aliases = [
+      (apacheTwo) : ['Apache Licence 2.0', 'The Apache Software License, Version 2.0', 'Apache 2', 'Apache License Version 2.0', 'Apache License, Version 2.0', 'Apache License 2.0', license('Apache License', 'http://www.apache.org/licenses/LICENSE-2.0')],
+      (lgpl) : ['GNU Lesser General Public License', 'GNU Lesser General Public License (LGPL), Version 2.1']
+    ]
+
+    dependencyConfiguration = 'runtimeClasspath'
   }
 }
 
