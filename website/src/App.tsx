@@ -4,7 +4,7 @@ import "@mantine/core/styles.css";
 
 import { MantineProvider, Title } from "@mantine/core";
 import { AppLayout } from "./_components/AppShell";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { HashRouter, Route, Routes } from "react-router-dom";
 import { WeekList } from "./pages/weeks/page";
 import Week1 from "./pages/weeks/Week1";
 import LicensePage from "./_components/LicensePage";
@@ -12,7 +12,7 @@ import LicensePage from "./_components/LicensePage";
 export default function App() {
   return (
     <MantineProvider defaultColorScheme="dark">
-      <BrowserRouter>
+      <HashRouter>
         <Routes>
           <Route
             path="/"
@@ -42,7 +42,7 @@ export default function App() {
             </Route>
           </Route>
         </Routes>
-      </BrowserRouter>
+      </HashRouter>
     </MantineProvider>
   );
 }
