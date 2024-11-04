@@ -18,4 +18,5 @@ export const LayoutContext = createContext<TLayoutContext>(
   null as unknown as TLayoutContext
 );
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useLayoutContext = () => useContext(LayoutContext);

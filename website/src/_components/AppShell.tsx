@@ -12,6 +12,7 @@ import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { CNavLink } from "./CustomNavLink";
 import { FaCalendar, FaHome } from "react-icons/fa";
 import { LayoutContext } from "./LayoutContext";
+import { IoDocumentText } from "react-icons/io5";
 
 export function AppLayout() {
   const [mobileOpened, { toggle: toggleMobile, close: closeMobile }] =
@@ -118,6 +119,11 @@ export function AppLayout() {
               label="Week 3"
             />
           </CNavLink>
+          <CNavLink
+            to="/licenses"
+            label="Game Licenses"
+            leftSection={<IoDocumentText />}
+          />
         </AppShell.Navbar>
         <AppShell.Main>
           <Breadcrumbs>{items}</Breadcrumbs>

@@ -13,6 +13,8 @@ dist-ssr
 *.local
 *.tsbuildinfo
 
+public/*license-dependency.json
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
