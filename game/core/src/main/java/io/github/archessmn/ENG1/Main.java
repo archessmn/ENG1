@@ -6,18 +6,24 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.*;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import io.github.archessmn.ENG1.Buildings.*;
 import io.github.archessmn.ENG1.Buildings.Building;
-import io.github.archessmn.ENG1.Util.GridUtils;
 
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
 public class Main extends ApplicationAdapter {
@@ -30,27 +36,24 @@ public class Main extends ApplicationAdapter {
 
     AssetManager assetManager;
 
+    TextureAtlas atlas;
+    Skin skin;
+
     ShapeRenderer gridRenderer;
     ShapeRenderer shapeRenderer;
+    ShapeRenderer blockRenderer;
 
     FitViewport viewport;
 
     Vector2 touchPos;
     Vector2 unprojectedTouchPos;
 
-//    Array<Sprite> logoSprites;
-
-//    Array<Sprite> dropSprites;
-
     Array<Building> draggableBuildings;
     Array<Building> buildings;
-
-    float dropTimer;
 
     float gameTimer;
 
     Rectangle buildingRectangle;
-//    Rectangle dropRectangle;
     BitmapFont font;
     Boolean isClicked = false;
     Integer buildingClicked = -1;
@@ -59,11 +62,45 @@ public class Main extends ApplicationAdapter {
 
     Integer score = 0;
 
+    private Stage stage;
+    private Table rootTable;
+    private Table rightTable;
+
     @Override
     public void create() {
         world = new World(VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
 
         batch = new SpriteBatch();
+
+        atlas = new TextureAtlas(Gdx.files.internal("ui/uiskin.atlas"));
+        skin = new Skin(Gdx.files.internal("ui/uiskin.json"));
+        skin.addRegions(atlas);
+
+        Label.LabelStyle labelStyle = skin.get(Label.LabelStyle.class);
+        TextButtonStyle textButtonStyle = skin.get(TextButtonStyle.class);
+
+        Label label = new Label("Title", labelStyle);
+        TextButton button = new TextButton("Clear Buildings", textButtonStyle);
+
+
+        stage = new Stage();
+        Gdx.input.setInputProcessor(stage);
+
+        rootTable = new Table();
+        rootTable.setFillParent(true);
+        stage.addActor(rootTable);
+
+        rightTable = new Table();
+
+        rightTable.pad(10);
+
+        rootTable.right().add(rightTable).expandY().fillY().width(300);
+
+        rootTable.setDebug(true);
+        rightTable.setDebug(true);
+
+        rightTable.add(label).row();
+        rightTable.add(button).expandX().expandY().left().top();
 
         assetManager = world.assetManager;
 
@@ -83,12 +120,20 @@ public class Main extends ApplicationAdapter {
 
         shapeRenderer = world.shapeRenderer;
         gridRenderer = world.gridRenderer;
+        blockRenderer = new ShapeRenderer();
 
         viewport = world.viewport;
 
         buildingRectangle = new Rectangle();
 
         font = world.font;
+
+        button.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                buildings.clear();
+            }
+        });
     }
 
     @Override
@@ -98,22 +143,10 @@ public class Main extends ApplicationAdapter {
         draw();
     }
 
-    private void createDroplet() {
-        float dropWidth = 60;
-        float dropHeight = 60;
-        float worldWidth = viewport.getWorldWidth();
-        float worldHeight = viewport.getWorldHeight();
-
-//        Sprite dropSprite = new Sprite(hallsSprite);
-//        dropSprite.setSize(dropWidth, dropHeight);
-//        dropSprite.setX(MathUtils.random(0f, worldWidth - dropWidth));
-//        dropSprite.setY(worldHeight);
-//        dropSprites.add(dropSprite);
-    }
-
     @Override
     public void resize(int width, int height) {
         viewport.update(width, height, true);
+        stage.getViewport().update(width, height, true);
     }
 
     private void input() {
@@ -160,18 +193,15 @@ public class Main extends ApplicationAdapter {
         float worldHeight = viewport.getWorldHeight();
 
         for (Building building : buildings) {
-            building.sprite.setX(MathUtils.clamp(building.x, 0, worldWidth - building.width));
-            building.sprite.setY(MathUtils.clamp(building.y, 0, worldHeight - building.height));
+            building.setX(MathUtils.clamp(building.x, 0, worldWidth - building.width - rightTable.getWidth()));
+            building.setY(MathUtils.clamp(building.y, 0, worldHeight - building.height));
         }
 
         float delta = Gdx.graphics.getDeltaTime();
 
         gameTimer += delta;
 
-        dropTimer += delta; // Adds the current delta to the timer
-        if (dropTimer > 1f) { // Check if it has been more than a second
-            dropTimer = 0; // Reset the timer
-        }
+        stage.act(delta);
     }
 
     private void draw() {
@@ -212,6 +242,15 @@ public class Main extends ApplicationAdapter {
         if (paused) font.draw(batch, "Paused", 480, 400);
 
         batch.end();
+
+        blockRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        blockRenderer.setColor(Color.DARK_GRAY);
+
+        blockRenderer.rect(rightTable.getX(), rightTable.getY(), rightTable.getWidth(), rightTable.getHeight());
+
+        blockRenderer.end();
+
+        stage.draw();
     }
 
     @Override

@@ -51,6 +51,14 @@ public abstract class Building {
         this.y = y - this.height / 2;
     }
 
+    public void setX(float x) {
+        this.x = x;
+    }
+
+    public void setY(float y) {
+        this.y = y;
+    }
+
     public void draw(SpriteBatch batch) {
         sprite.setX(this.x);
         sprite.setY(this.y);
