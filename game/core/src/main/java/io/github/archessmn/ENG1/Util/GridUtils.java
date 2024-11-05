@@ -15,11 +15,11 @@ public class GridUtils {
         float gridHeight = (VIEWPORT_HEIGHT / 9f);
 
         for (int v = 1; v < 9; v++) {
-            gridRenderer.line(0, gridWidth * v, VIEWPORT_WIDTH, gridWidth * v);
+            gridRenderer.line(0, gridHeight * v, VIEWPORT_WIDTH - 300, gridHeight * v);
         }
 
-        for (int h = 1; h < 16; h++) {
-            gridRenderer.line(gridHeight * h, 0,gridHeight * h, VIEWPORT_HEIGHT);
+        for (int h = 1; h < 11; h++) {
+            gridRenderer.line(gridWidth * h, 0,gridWidth * h, VIEWPORT_HEIGHT);
         }
 
         gridRenderer.end();
