@@ -1,5 +1,6 @@
 package io.github.archessmn.ENG1.Util;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
@@ -10,6 +11,8 @@ import static io.github.archessmn.ENG1.Main.VIEWPORT_WIDTH;
 public class GridUtils {
     public static void drawGrid(ShapeRenderer gridRenderer) {
         gridRenderer.begin(ShapeRenderer.ShapeType.Line);
+
+        gridRenderer.setColor(new Color(0x5b7e13ff));
 
         float gridWidth = (VIEWPORT_WIDTH / 16f);
         float gridHeight = (VIEWPORT_HEIGHT / 9f);

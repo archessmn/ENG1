@@ -6,10 +6,10 @@ import io.github.archessmn.ENG1.World;
 
 public class LectureHallBuilding extends Building {
     public LectureHallBuilding(World world, float x, float y) {
-        super(world, Type.LECTURE_HALL, x, y, 60, 60);
+        super(world, Type.LECTURE_HALL, x, y, 60, 60, 10f, false);
+    }
 
-        this.sprite = new Sprite(world.assetManager.get("lecturehall.png", Texture.class));
-
-        this.sprite.setSize(60, 60);
+    public LectureHallBuilding(World world, float x, float y, boolean built) {
+        super(world, Type.LECTURE_HALL, x, y, 60, 60, 10f, built);
     }
 }

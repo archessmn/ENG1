@@ -6,10 +6,10 @@ import io.github.archessmn.ENG1.World;
 
 public class PiazzaBuilding extends Building {
     public PiazzaBuilding(World world, float x, float y) {
-        super(world, Type.PIAZZA, x, y, 60, 60);
+        super(world, Type.PIAZZA, x, y, 60, 60, 10f, false);
+    }
 
-        this.sprite = new Sprite(world.assetManager.get("piazza.png", Texture.class));
-
-        this.sprite.setSize(60, 60);
+    public PiazzaBuilding(World world, float x, float y, boolean built) {
+        super(world, Type.PIAZZA, x, y, 60, 60, 10f, built);
     }
 }

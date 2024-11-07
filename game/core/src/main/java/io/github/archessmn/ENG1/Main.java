@@ -32,8 +32,6 @@ public class Main extends ApplicationAdapter {
 
     World world;
 
-    private SpriteBatch batch;
-
     AssetManager assetManager;
 
     TextureAtlas atlas;
@@ -49,7 +47,7 @@ public class Main extends ApplicationAdapter {
     Vector2 unprojectedTouchPos;
 
     Array<Building> draggableBuildings;
-    Array<Building> buildings;
+//    Array<Building> buildings;
 
     float gameTimer;
 
@@ -60,17 +58,19 @@ public class Main extends ApplicationAdapter {
 
     Boolean paused = false;
 
-    Integer score = 0;
-
     private Stage stage;
-    private Table rootTable;
     private Table rightTable;
+
+    private Label timerLabel;
+    private Label sleepBuildingsCountLabel;
+    private Label learnBuildingsCountLabel;
+    private Label eatBuildingsCountLabel;
+    private Label recreationBuildingsCountLabel;
 
     @Override
     public void create() {
-        world = new World(VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
-
-        batch = new SpriteBatch();
+        // 300 here represents the pixel width of the UI on the right hand side
+        world = new World(VIEWPORT_WIDTH, VIEWPORT_HEIGHT, VIEWPORT_WIDTH - 300, VIEWPORT_HEIGHT);
 
         atlas = new TextureAtlas(Gdx.files.internal("ui/uiskin.atlas"));
         skin = new Skin(Gdx.files.internal("ui/uiskin.json"));
@@ -80,13 +80,22 @@ public class Main extends ApplicationAdapter {
         TextButtonStyle textButtonStyle = skin.get(TextButtonStyle.class);
 
         Label label = new Label("Title", labelStyle);
+        timerLabel = new Label("Timer", labelStyle);
+        Label sleepBuildingsLabel = new Label("Sleep buildings:", labelStyle);
+        Label learnBuildingsLabel = new Label("Education buildings:", labelStyle);
+        Label eatBuildingsLabel = new Label("Food buildings:", labelStyle);
+        Label recreationBuildingsLabel = new Label("Recreation buildings:", labelStyle);
+        sleepBuildingsCountLabel = new Label("", labelStyle);
+        learnBuildingsCountLabel = new Label("", labelStyle);
+        eatBuildingsCountLabel = new Label("", labelStyle);
+        recreationBuildingsCountLabel = new Label("", labelStyle);
         TextButton button = new TextButton("Clear Buildings", textButtonStyle);
 
 
         stage = new Stage();
         Gdx.input.setInputProcessor(stage);
 
-        rootTable = new Table();
+        Table rootTable = new Table();
         rootTable.setFillParent(true);
         stage.addActor(rootTable);
 
@@ -96,25 +105,34 @@ public class Main extends ApplicationAdapter {
 
         rootTable.right().add(rightTable).expandY().fillY().width(300);
 
-        rootTable.setDebug(true);
-        rightTable.setDebug(true);
+//        rootTable.setDebug(true);
+//        rightTable.setDebug(true);
 
         rightTable.add(label).row();
-        rightTable.add(button).expandX().expandY().left().top();
+        rightTable.add(timerLabel).row();
+        rightTable.add(sleepBuildingsLabel).left();
+        rightTable.add(sleepBuildingsCountLabel).right().row();
+        rightTable.add(learnBuildingsLabel).left();
+        rightTable.add(learnBuildingsCountLabel).right().row();
+        rightTable.add(eatBuildingsLabel).left();
+        rightTable.add(eatBuildingsCountLabel).right().row();
+        rightTable.add(recreationBuildingsLabel).left();
+        rightTable.add(recreationBuildingsCountLabel).right().row();
+        rightTable.add(button).expandX().expandY().left().top().row();
 
         assetManager = world.assetManager;
 
         touchPos = new Vector2();
         unprojectedTouchPos = new Vector2();
 
-        buildings = new Array<>();
+//        buildings = new Array<>();
         draggableBuildings = new Array<>();
 
-        draggableBuildings.add(new GymBuilding(world, 0, 0));
-        draggableBuildings.add(new HallsBuilding(world, 60, 0));
-        draggableBuildings.add(new LectureHallBuilding(world, 120, 0));
-        draggableBuildings.add(new OfficeBuilding(world, 180, 0));
-        draggableBuildings.add(new PiazzaBuilding(world, 240, 0));
+        draggableBuildings.add(new GymBuilding(world, 660, 0, true));
+        draggableBuildings.add(new HallsBuilding(world, 720, 0, true));
+        draggableBuildings.add(new LectureHallBuilding(world, 780, 0, true));
+        draggableBuildings.add(new OfficeBuilding(world, 840, 0, true));
+        draggableBuildings.add(new PiazzaBuilding(world, 900, 0, true));
 
         gameTimer = 0f;
 
@@ -131,7 +149,7 @@ public class Main extends ApplicationAdapter {
         button.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                buildings.clear();
+                world.buildings.clear();
             }
         });
     }
@@ -165,24 +183,22 @@ public class Main extends ApplicationAdapter {
         if (Gdx.input.justTouched()) {
             for (int i = draggableBuildings.size - 1; i >= 0; i--) {
                 Building building = draggableBuildings.get(i);
-//                Sprite sprite = building.sprite;
 
                 if (building.getBounds().contains(unprojectedTouchPos)) {
-                    buildings.add(building.makeCopy());
-                    buildingClicked = buildings.size - 1;
+                    buildingClicked = world.addBuilding(building.makeCopy());
                     break;
                 }
             }
         } else if (!isClicked && buildingClicked != -1) {
-            Building building = buildings.get(buildingClicked);
+            Building building = world.getBuilding(buildingClicked);
 
-            building.snapToGrid();
+            building.place();
 
             buildingClicked = -1;
         }
 
         if (buildingClicked != -1) {
-            buildings.get(buildingClicked).setCenter(touchPos.x, touchPos.y);
+            world.getBuilding(buildingClicked).setCenter(touchPos.x, touchPos.y);
         }
     }
 
@@ -192,12 +208,9 @@ public class Main extends ApplicationAdapter {
         float worldWidth = viewport.getWorldWidth();
         float worldHeight = viewport.getWorldHeight();
 
-        for (Building building : buildings) {
-            building.setX(MathUtils.clamp(building.x, 0, worldWidth - building.width - rightTable.getWidth()));
-            building.setY(MathUtils.clamp(building.y, 0, worldHeight - building.height));
-        }
-
         float delta = Gdx.graphics.getDeltaTime();
+
+        world.tickBuildings();
 
         gameTimer += delta;
 
@@ -208,7 +221,7 @@ public class Main extends ApplicationAdapter {
         ScreenUtils.clear(Color.OLIVE);
         viewport.apply();
 
-        batch.setProjectionMatrix(viewport.getCamera().combined);
+        world.batch.setProjectionMatrix(viewport.getCamera().combined);
 
         world.drawGrid();
 
@@ -216,32 +229,14 @@ public class Main extends ApplicationAdapter {
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
         shapeRenderer.setColor(Color.RED);
         if (buildingClicked != -1) {
-            Building building = buildings.get(buildingClicked);
+            Building building = world.getBuilding(buildingClicked);
             Vector2 buldingCoords = building.getGridCoords();
             shapeRenderer.rect(buldingCoords.x - (building.width / 2), buldingCoords.y - (building.height / 2), building.width, building.height);
         }
 
         shapeRenderer.end();
 
-        batch.begin();
 
-        for (Building building : draggableBuildings) {
-            building.draw(batch);
-        }
-
-        for (Building building : buildings) {
-            building.draw(batch);
-        }
-
-        font.draw(batch, String.format("Score: %d", score), 0, 520);
-        font.draw(batch, String.format("Time: %f", gameTimer), 0, 480);
-        font.draw(batch, String.format("touch x: %f touch y: %f", touchPos.x, touchPos.y), 0, 440);
-        if (buildingClicked != -1) font.draw(batch, String.format("touch x: %f touch y: %f", buildings.get(buildingClicked).x, buildings.get(buildingClicked).y), 0, 400);
-        font.draw(batch, String.format("buildingClicked: %d", buildingClicked), 0, 360);
-
-        if (paused) font.draw(batch, "Paused", 480, 400);
-
-        batch.end();
 
         blockRenderer.begin(ShapeRenderer.ShapeType.Filled);
         blockRenderer.setColor(Color.DARK_GRAY);
@@ -250,12 +245,30 @@ public class Main extends ApplicationAdapter {
 
         blockRenderer.end();
 
+        world.batch.begin();
+
+        for (Building building : draggableBuildings) {
+            building.draw(world.batch);
+        }
+
+        world.drawBuildings();
+
+        timerLabel.setText(String.format("Year: %d, Day: %d", (int) (gameTimer / 60) + 1, (int) ((gameTimer % 60) / (60 / (double) 365)) + 1));
+
+        if (paused) font.draw(world.batch, "Paused", 480, 400);
+
+        world.batch.end();
+
+        sleepBuildingsCountLabel.setText(world.sleepBuildings);
+        learnBuildingsCountLabel.setText(world.learnBuildings);
+        eatBuildingsCountLabel.setText(world.eatBuildings);
+        recreationBuildingsCountLabel.setText(world.recreationBuildings);
+
         stage.draw();
     }
 
     @Override
     public void dispose() {
-        batch.dispose();
-        assetManager.dispose();
+        world.dispose();
     }
 }
