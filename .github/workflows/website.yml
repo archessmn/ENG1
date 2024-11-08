@@ -12,7 +12,7 @@ jobs:
 
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -20,7 +20,7 @@ jobs:
           distribution: "corretto"
           java-version: "17"
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
+        uses: gradle/actions/setup-gradle@v4
       - name: Download Licenses
         run: ./gradlew downloadLicenses
         working-directory: ./game
@@ -28,7 +28,7 @@ jobs:
         run: cp game/core/build/reports/license/license-dependency.json website/public/core-license-dependency.json && cp game/lwjgl3/build/reports/license/license-dependency.json website/public/lwjgl3-license-dependency.json
 
       - name: Setup Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
 
       - name: Install dependencies
         uses: bahmutov/npm-install@v1
@@ -45,7 +45,7 @@ jobs:
           echo "eng1.archess.mn" >> website/dist/CNAME
 
       - name: Upload production-ready build files
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: production-files
           path: ./website/dist
