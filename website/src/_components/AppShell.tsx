@@ -106,18 +106,12 @@ export function AppLayout() {
             label="Weeks"
             onClick={closeMobile}
           >
-            <CNavLink
-              to="/weeks/1"
-              label="Week 1"
-            />
-            <CNavLink
-              to="/weeks/2"
-              label="Week 2"
-            />
-            <CNavLink
-              to="/weeks/3"
-              label="Week 3"
-            />
+            {[...Array(7)].map((_v, idx) => (
+              <CNavLink
+                to={`/weeks/${idx + 1}`}
+                label={`Week ${idx + 1}`}
+              />
+            ))}
           </CNavLink>
           <CNavLink
             to="/licenses"
