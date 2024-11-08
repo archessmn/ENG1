@@ -90,7 +90,7 @@ export function AppLayout() {
               to={"/"}
               onClick={closeMobile}
             >
-              <Title>ENG1 Cohort 2 Group 3</Title>
+              <Title>ENG1 CH2 GRP3</Title>
             </Text>
           </Group>
         </AppShell.Header>

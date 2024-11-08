@@ -15,6 +15,7 @@ import Week5 from "./pages/weeks/Week5";
 import Week6 from "./pages/weeks/Week6";
 import Week7 from "./pages/weeks/Week7";
 import { ModalsProvider } from "@mantine/modals";
+import { RootPage } from "./pages/page";
 
 export default function App() {
   return (
@@ -28,7 +29,7 @@ export default function App() {
             >
               <Route
                 path=""
-                element={<Title>Hello World!</Title>}
+                element={<RootPage />}
               />
               <Route
                 path="test"
