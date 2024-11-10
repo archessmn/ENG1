@@ -6,7 +6,7 @@ import { MantineProvider, Title } from "@mantine/core";
 import { AppLayout } from "./_components/AppShell";
 import { HashRouter, Route, Routes } from "react-router-dom";
 import { WeekList } from "./pages/weeks/page";
-import LicensePage from "./_components/LicensePage";
+import LicensePage from "./pages/licenses/page";
 import Week1 from "./pages/weeks/Week1";
 import Week2 from "./pages/weeks/Week2";
 import Week3 from "./pages/weeks/Week3";
@@ -16,6 +16,10 @@ import Week6 from "./pages/weeks/Week6";
 import Week7 from "./pages/weeks/Week7";
 import { ModalsProvider } from "@mantine/modals";
 import { RootPage } from "./pages/page";
+import Arch1Page from "./pages/arch1/page";
+import CRCCards from "./pages/arch1/CRCCards";
+import BehavioralPage from "./pages/arch1/Behavioral";
+import StructuralPage from "./pages/arch1/Structural";
 
 export default function App() {
   return (
@@ -39,6 +43,24 @@ export default function App() {
                 path="licenses"
                 element={<LicensePage />}
               />
+              <Route path="arch1">
+                <Route
+                  index
+                  element={<Arch1Page />}
+                />
+                <Route
+                  path="crc-cards"
+                  element={<CRCCards />}
+                />
+                <Route
+                  path="behavioral"
+                  element={<BehavioralPage />}
+                />
+                <Route
+                  path="structural"
+                  element={<StructuralPage />}
+                />
+              </Route>
               <Route path="weeks">
                 <Route
                   index

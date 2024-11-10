@@ -10,7 +10,7 @@ export default function CustomImage(props: { src: string }) {
       fit="contain"
       onClick={() => {
         modals.open({
-          title: "Image",
+          title: `Image: ${props.src}`,
           fullScreen: true,
           children: (
             <Image

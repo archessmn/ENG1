@@ -13,6 +13,7 @@ import { CNavLink } from "./CustomNavLink";
 import { FaCalendar, FaHome } from "react-icons/fa";
 import { LayoutContext } from "./LayoutContext";
 import { IoDocumentText } from "react-icons/io5";
+import { MdArchitecture } from "react-icons/md";
 
 export function AppLayout() {
   const [mobileOpened, { toggle: toggleMobile, close: closeMobile }] =
@@ -100,6 +101,24 @@ export function AppLayout() {
             label="Home"
             leftSection={<FaHome />}
           />
+          <CNavLink
+            to="/arch1"
+            label="Arch1"
+            leftSection={<MdArchitecture />}
+          >
+            <CNavLink
+              to="/arch1/crc-cards"
+              label={`CRC Cards`}
+            />
+            <CNavLink
+              to="/arch1/behavioral"
+              label={`Behavioral Diagrams`}
+            />
+            <CNavLink
+              to="/arch1/structural"
+              label={`Structural Diagrams`}
+            />
+          </CNavLink>
           <CNavLink
             to="/weeks"
             leftSection={<FaCalendar />}
