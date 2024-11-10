@@ -2,7 +2,6 @@ package io.github.archessmn.ENG1;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
-import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -92,7 +91,6 @@ public class World {
             buildingUseCounts.put(building.getBuildingUse(), buildingUseCounts.get(building.getBuildingUse()) + 1);
             building.tick(Gdx.graphics.getDeltaTime());
         }
-        ;
     }
 
     public void drawBuildings() {

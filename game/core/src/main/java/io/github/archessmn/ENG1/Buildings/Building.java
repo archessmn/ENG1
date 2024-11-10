@@ -26,7 +26,7 @@ public class Building {
     public float timeUntilBuilt;
 
     private boolean placed = false;
-    private boolean built = false;
+    private boolean built;
 
     public enum Type {
         GYM,

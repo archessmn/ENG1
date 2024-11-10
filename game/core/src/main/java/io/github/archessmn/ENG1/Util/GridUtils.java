@@ -29,13 +29,6 @@ public class GridUtils {
 
     }
 
-
-    public static Vector2 getRawGridCoords(Vector2 pos) {
-        float rawGridX = calcRawGridXCoord(pos.x);
-        float rawGridY = calcRawGridYCoord(pos.y);
-        return new Vector2(rawGridX, rawGridY);
-    }
-
     public static Vector2 getRawGridCoords(float x, float y) {
         float rawGridX = calcRawGridXCoord(x);
         float rawGridY = calcRawGridYCoord(y);
