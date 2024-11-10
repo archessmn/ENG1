@@ -57,6 +57,7 @@ public class Main extends ApplicationAdapter {
     Integer buildingClicked = -1;
 
     Boolean paused = true;
+    Boolean gameEnded = false;
 
     private Stage stage;
     private Table rightTable;
@@ -162,7 +163,7 @@ public class Main extends ApplicationAdapter {
     private void input() {
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) paused = !paused;
 
-        if (paused) {
+        if (paused || gameEnded) {
             buildingClicked = -1;
             return;
         }
@@ -199,13 +200,17 @@ public class Main extends ApplicationAdapter {
     }
 
     private void logic() {
-        if (paused) return;
+        if (paused || gameEnded) return;
 
         float delta = Gdx.graphics.getDeltaTime();
 
         world.tickBuildings();
 
         gameTimer += delta;
+
+        if (gameTimer >= 300) {
+            gameEnded = true;
+        }
 
         stage.act(delta);
     }
@@ -257,6 +262,11 @@ public class Main extends ApplicationAdapter {
 
         if (paused) {
             font.draw(world.batch, "Paused, press [ESC] to resume", 20, 460);
+            font.draw(world.batch, "Building icons from macrovector on Freepik", 0, 25);
+        }
+
+        if (gameEnded) {
+            font.draw(world.batch, "End of the game!", 20, 460);
             font.draw(world.batch, "Building icons from macrovector on Freepik", 0, 25);
         }
 
