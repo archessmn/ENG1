@@ -255,7 +255,10 @@ public class Main extends ApplicationAdapter {
             }
         }
 
-        if (paused) font.draw(world.batch, "Paused, press [ESC] to resume", 20, 460);
+        if (paused) {
+            font.draw(world.batch, "Paused, press [ESC] to resume", 20, 460);
+            font.draw(world.batch, "Building icons from macrovector on Freepik", 0, 25);
+        }
 
         world.batch.end();
 
