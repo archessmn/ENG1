@@ -6,12 +6,18 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import io.github.archessmn.ENG1.Util.GridCoordTuple;
 import io.github.archessmn.ENG1.Util.GridUtils;
 import io.github.archessmn.ENG1.World;
 
 public class Building {
     public float x;
     public float y;
+
+    public int gridX;
+    public int gridY;
+
+    public final int id;
 
     public float width;
     public float height;
@@ -45,9 +51,9 @@ public class Building {
     private Sprite unbuiltSprite;
     private final World world;
 
-    boolean clicked = false;
-
     public Building(World world, Type buildingType, float x, float y, float width, float height, float timeUntilBuilt, boolean built) {
+        this.id = world.buildings.size - 1;
+
         this.x = x;
         this.y = y;
 
@@ -60,7 +66,7 @@ public class Building {
         this.built = built;
 
         if (timeUntilBuilt > 0) {
-            this.unbuiltSprite = new Sprite(world.assetManager.get("missing_texture.png", Texture.class));
+            this.unbuiltSprite = new Sprite(world.assetManager.get("construction.png", Texture.class));
             this.unbuiltSprite.setSize(width, height);
         }
 
@@ -100,9 +106,18 @@ public class Building {
         if (timeUntilBuilt <= 0) built = true;
     }
 
-    public void place() {
+    public boolean place() {
+        if (world.doesBuildingOverlap(this)) {
+            return false;
+        }
         this.snapToGrid();
+        GridCoordTuple gridCoord = GridUtils.getGridCoords(this.x, this.y);
+        this.gridX = gridCoord.x;
+        this.gridY = gridCoord.y;
+
         this.placed = true;
+
+        return placed;
     }
 
     public void setCenter(float x, float y) {
@@ -126,12 +141,16 @@ public class Building {
         return new Building(this.world, this.buildingType, this.x, this.y + 60, this.width, this.height, this.initialBuildTime, false);
     }
 
-    public Vector2 getGridCoords() {
+    public Vector2 getRawGridCoords() {
+        return GridUtils.getRawGridCoords(this.x + this.width / 2, this.y + this.height / 2);
+    }
+
+    public GridCoordTuple getGridCoords() {
         return GridUtils.getGridCoords(this.x + this.width / 2, this.y + this.height / 2);
     }
 
     public void snapToGrid() {
-        Vector2 gridCoords = getGridCoords();
+        Vector2 gridCoords = getRawGridCoords();
         this.setCenter(gridCoords.x, gridCoords.y);
     }
 
@@ -144,4 +163,3 @@ public class Building {
         };
     }
 }
-

@@ -6,26 +6,26 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
-import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import io.github.archessmn.ENG1.Buildings.*;
 import io.github.archessmn.ENG1.Buildings.Building;
 
-/** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
+import java.util.HashMap;
+
+/**
+ * {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms.
+ */
 public class Main extends ApplicationAdapter {
     public static final Integer VIEWPORT_WIDTH = 960;
     public static final Integer VIEWPORT_HEIGHT = 540;
@@ -56,16 +56,14 @@ public class Main extends ApplicationAdapter {
     Boolean isClicked = false;
     Integer buildingClicked = -1;
 
-    Boolean paused = false;
+    Boolean paused = true;
 
     private Stage stage;
     private Table rightTable;
 
     private Label timerLabel;
-    private Label sleepBuildingsCountLabel;
-    private Label learnBuildingsCountLabel;
-    private Label eatBuildingsCountLabel;
-    private Label recreationBuildingsCountLabel;
+    private final HashMap<Building.Use, Label> buildingUseCountLabels = new HashMap<>();
+    private final HashMap<Building.Use, Label> buildingUseNameLabels = new HashMap<>();
 
     @Override
     public void create() {
@@ -79,16 +77,17 @@ public class Main extends ApplicationAdapter {
         Label.LabelStyle labelStyle = skin.get(Label.LabelStyle.class);
         TextButtonStyle textButtonStyle = skin.get(TextButtonStyle.class);
 
-        Label label = new Label("Title", labelStyle);
+        Label label = new Label("ENG1 CH2 GRP3 UniSim", labelStyle);
         timerLabel = new Label("Timer", labelStyle);
-        Label sleepBuildingsLabel = new Label("Sleep buildings:", labelStyle);
-        Label learnBuildingsLabel = new Label("Education buildings:", labelStyle);
-        Label eatBuildingsLabel = new Label("Food buildings:", labelStyle);
-        Label recreationBuildingsLabel = new Label("Recreation buildings:", labelStyle);
-        sleepBuildingsCountLabel = new Label("", labelStyle);
-        learnBuildingsCountLabel = new Label("", labelStyle);
-        eatBuildingsCountLabel = new Label("", labelStyle);
-        recreationBuildingsCountLabel = new Label("", labelStyle);
+
+        for (Building.Use buildingUse : Building.Use.values()) {
+            String useName = buildingUse.toString().charAt(0) + buildingUse.toString().substring(1).toLowerCase();
+            buildingUseNameLabels.put(buildingUse, new Label(useName + " buildings:", labelStyle));
+        }
+        for (Building.Use buildingUse : Building.Use.values()) {
+            buildingUseCountLabels.put(buildingUse, new Label("0", labelStyle));
+        }
+
         TextButton button = new TextButton("Clear Buildings", textButtonStyle);
 
 
@@ -105,20 +104,13 @@ public class Main extends ApplicationAdapter {
 
         rootTable.right().add(rightTable).expandY().fillY().width(300);
 
-//        rootTable.setDebug(true);
-//        rightTable.setDebug(true);
-
         rightTable.add(label).row();
         rightTable.add(timerLabel).row();
-        rightTable.add(sleepBuildingsLabel).left();
-        rightTable.add(sleepBuildingsCountLabel).right().row();
-        rightTable.add(learnBuildingsLabel).left();
-        rightTable.add(learnBuildingsCountLabel).right().row();
-        rightTable.add(eatBuildingsLabel).left();
-        rightTable.add(eatBuildingsCountLabel).right().row();
-        rightTable.add(recreationBuildingsLabel).left();
-        rightTable.add(recreationBuildingsCountLabel).right().row();
-        rightTable.add(button).expandX().expandY().left().top().row();
+        for (Building.Use buildingUse : Building.Use.values()) {
+            rightTable.add(buildingUseNameLabels.get(buildingUse)).left();
+            rightTable.add(buildingUseCountLabels.get(buildingUse)).right().row();
+        }
+        rightTable.add(new Label("Gym  Halls  Lecture Hall  Office  Piazza", labelStyle)).expandX().expandY().bottom();
 
         assetManager = world.assetManager;
 
@@ -128,11 +120,11 @@ public class Main extends ApplicationAdapter {
 //        buildings = new Array<>();
         draggableBuildings = new Array<>();
 
-        draggableBuildings.add(new GymBuilding(world, 660, 0, true));
-        draggableBuildings.add(new HallsBuilding(world, 720, 0, true));
-        draggableBuildings.add(new LectureHallBuilding(world, 780, 0, true));
-        draggableBuildings.add(new OfficeBuilding(world, 840, 0, true));
-        draggableBuildings.add(new PiazzaBuilding(world, 900, 0, true));
+        draggableBuildings.add(new GymBuilding(world, 660, 40, true));
+        draggableBuildings.add(new HallsBuilding(world, 720, 40, true));
+        draggableBuildings.add(new LectureHallBuilding(world, 780, 40, true));
+        draggableBuildings.add(new OfficeBuilding(world, 840, 40, true));
+        draggableBuildings.add(new PiazzaBuilding(world, 900, 40, true));
 
         gameTimer = 0f;
 
@@ -192,7 +184,11 @@ public class Main extends ApplicationAdapter {
         } else if (!isClicked && buildingClicked != -1) {
             Building building = world.getBuilding(buildingClicked);
 
-            building.place();
+            boolean placeSuccess = building.place();
+
+            if (!placeSuccess) {
+                world.buildings.removeIndex(buildingClicked);
+            }
 
             buildingClicked = -1;
         }
@@ -204,9 +200,6 @@ public class Main extends ApplicationAdapter {
 
     private void logic() {
         if (paused) return;
-
-        float worldWidth = viewport.getWorldWidth();
-        float worldHeight = viewport.getWorldHeight();
 
         float delta = Gdx.graphics.getDeltaTime();
 
@@ -226,16 +219,18 @@ public class Main extends ApplicationAdapter {
         world.drawGrid();
 
         // Draw red outline for where the logo will snap to
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-        shapeRenderer.setColor(Color.RED);
         if (buildingClicked != -1) {
             Building building = world.getBuilding(buildingClicked);
-            Vector2 buldingCoords = building.getGridCoords();
+            if (world.doesBuildingOverlap(building)) {
+                shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+            } else {
+                shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+            }
+            shapeRenderer.setColor(Color.RED);
+            Vector2 buldingCoords = building.getRawGridCoords();
             shapeRenderer.rect(buldingCoords.x - (building.width / 2), buldingCoords.y - (building.height / 2), building.width, building.height);
+            shapeRenderer.end();
         }
-
-        shapeRenderer.end();
-
 
 
         blockRenderer.begin(ShapeRenderer.ShapeType.Filled);
@@ -254,15 +249,19 @@ public class Main extends ApplicationAdapter {
         world.drawBuildings();
 
         timerLabel.setText(String.format("Year: %d, Day: %d", (int) (gameTimer / 60) + 1, (int) ((gameTimer % 60) / (60 / (double) 365)) + 1));
+        if (buildingClicked != -1) {
+            if (world.doesBuildingOverlap(buildingClicked)) {
+                font.draw(world.batch, "Buildings overlap", 20, 520);
+            }
+        }
 
-        if (paused) font.draw(world.batch, "Paused", 480, 400);
+        if (paused) font.draw(world.batch, "Paused, press [ESC] to resume", 20, 460);
 
         world.batch.end();
 
-        sleepBuildingsCountLabel.setText(world.sleepBuildings);
-        learnBuildingsCountLabel.setText(world.learnBuildings);
-        eatBuildingsCountLabel.setText(world.eatBuildings);
-        recreationBuildingsCountLabel.setText(world.recreationBuildings);
+        for (Building.Use use : Building.Use.values()) {
+            buildingUseCountLabels.get(use).setText(world.buildingUseCounts.get(use));
+        }
 
         stage.draw();
     }

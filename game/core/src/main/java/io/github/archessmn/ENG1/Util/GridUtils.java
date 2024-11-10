@@ -22,7 +22,7 @@ public class GridUtils {
         }
 
         for (int h = 1; h < 11; h++) {
-            gridRenderer.line(gridWidth * h, 0,gridWidth * h, VIEWPORT_HEIGHT);
+            gridRenderer.line(gridWidth * h, 0, gridWidth * h, VIEWPORT_HEIGHT);
         }
 
         gridRenderer.end();
@@ -30,24 +30,34 @@ public class GridUtils {
     }
 
 
-    public static Vector2 getGridCoords(Vector2 pos) {
-        float gridX = calcGridXCoord(pos.x);
-        float gridY = calcGridYCoord(pos.y);
-        return new Vector2(gridX, gridY);
+    public static Vector2 getRawGridCoords(Vector2 pos) {
+        float rawGridX = calcRawGridXCoord(pos.x);
+        float rawGridY = calcRawGridYCoord(pos.y);
+        return new Vector2(rawGridX, rawGridY);
     }
 
-    public static Vector2 getGridCoords(float x, float y) {
-        float gridX = calcGridXCoord(x);
-        float gridY = calcGridYCoord(y);
-        return new Vector2(gridX, gridY);
+    public static Vector2 getRawGridCoords(float x, float y) {
+        float rawGridX = calcRawGridXCoord(x);
+        float rawGridY = calcRawGridYCoord(y);
+        return new Vector2(rawGridX, rawGridY);
     }
 
-    public static float calcGridXCoord(float coord) {
+    public static GridCoordTuple getGridCoords(float x, float y) {
+        float gridWidth = (VIEWPORT_WIDTH / 16f);
+        float gridHeight = (VIEWPORT_HEIGHT / 9f);
+
+        int gridX = Math.round((x / gridWidth) + 0.5f);
+        int gridY = Math.round((y / gridHeight) + 0.5f);
+
+        return new GridCoordTuple(gridX, gridY);
+    }
+
+    public static float calcRawGridXCoord(float coord) {
         float gridWidth = (VIEWPORT_WIDTH / 16f);
         return (MathUtils.round(coord / gridWidth + 0.5f) * gridWidth) - (gridWidth / 2f);
     }
 
-    public static float calcGridYCoord(float coord) {
+    public static float calcRawGridYCoord(float coord) {
         float gridHeight = (VIEWPORT_HEIGHT / 9f);
         return (MathUtils.round(coord / (gridHeight) + 0.5f) * gridHeight) - (gridHeight / 2f);
     }
