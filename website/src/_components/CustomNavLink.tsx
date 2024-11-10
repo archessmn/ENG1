@@ -8,24 +8,31 @@ export function CNavLink(props: {
   label: string;
   onClick?: () => void;
   leftSection?: ReactNode;
+  rightSection?: ReactNode;
   children?: ReactNode;
+  external?: boolean;
 }) {
   const layout = useLayoutContext();
 
   return (
-    <NavLink
-      component={ReactNavLink}
-      to={props.to}
-      label={props.label}
-      onClick={() => {
-        if (props.onClick) {
-          props.onClick();
-        }
-        layout.navbar.mobile.close();
-      }}
-      leftSection={props.leftSection}
-    >
-      {props.children}
-    </NavLink>
+    <>
+      <NavLink
+        component={ReactNavLink}
+        to={props.to}
+        label={props.label}
+        onClick={() => {
+          if (props.onClick) {
+            props.onClick();
+          }
+          layout.navbar.mobile.close();
+        }}
+        leftSection={props.leftSection}
+        rightSection={props.rightSection}
+        target={props.external ? "_blank" : ""}
+        rel={props.external ? "noopener noreferrer" : ""}
+      >
+        {props.children}
+      </NavLink>
+    </>
   );
 }

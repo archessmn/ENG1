@@ -10,7 +10,12 @@ import {
 import { useDisclosure } from "@mantine/hooks";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { CNavLink } from "./CustomNavLink";
-import { FaCalendar, FaHome } from "react-icons/fa";
+import {
+  FaCalendar,
+  FaExternalLinkAlt,
+  FaGithub,
+  FaHome,
+} from "react-icons/fa";
 import { LayoutContext } from "./LayoutContext";
 import { IoDocumentText } from "react-icons/io5";
 import { MdArchitecture } from "react-icons/md";
@@ -100,6 +105,13 @@ export function AppLayout() {
             to="/"
             label="Home"
             leftSection={<FaHome />}
+          />
+          <CNavLink
+            to="https://github.com/archessmn/ENG1"
+            label="GitHub"
+            leftSection={<FaGithub />}
+            rightSection={<FaExternalLinkAlt opacity={0.5} />}
+            external
           />
           <CNavLink
             to="/arch1"
