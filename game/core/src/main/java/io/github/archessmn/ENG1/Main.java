@@ -111,6 +111,9 @@ public class Main extends ApplicationAdapter {
             rightTable.add(buildingUseNameLabels.get(buildingUse)).left();
             rightTable.add(buildingUseCountLabels.get(buildingUse)).right().row();
         }
+        rightTable.add(new Label("\nHelp:", labelStyle)).row();
+        rightTable.add(new Label("Drag a building from below to place it", labelStyle)).left().top().row();
+        rightTable.add(new Label("onto the grid. Don't overlap them!", labelStyle)).left().top().row();
         rightTable.add(new Label("Gym  Halls  Lecture Hall  Office  Piazza", labelStyle)).expandX().expandY().bottom();
 
         assetManager = world.assetManager;
