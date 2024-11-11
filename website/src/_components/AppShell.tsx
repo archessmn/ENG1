@@ -15,10 +15,12 @@ import {
   FaExternalLinkAlt,
   FaGithub,
   FaHome,
+  FaJava,
 } from "react-icons/fa";
 import { LayoutContext } from "./LayoutContext";
 import { IoDocumentText } from "react-icons/io5";
 import { MdArchitecture } from "react-icons/md";
+import { FaFilePdf } from "react-icons/fa6";
 
 export function AppLayout() {
   const [mobileOpened, { toggle: toggleMobile, close: closeMobile }] =
@@ -116,7 +118,12 @@ export function AppLayout() {
           <CNavLink
             to="https://drive.google.com/drive/folders/1J6WqC8ZL57_cKZNBVh6YP5StXt0D0F5L?usp=sharing"
             label="Deliverables + Jar"
-            leftSection={<FaGithub />}
+            leftSection={
+              <Group>
+                <FaFilePdf />
+                <FaJava />
+              </Group>
+            }
             rightSection={<FaExternalLinkAlt opacity={0.5} />}
             external
           />
