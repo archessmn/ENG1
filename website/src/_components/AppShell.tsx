@@ -114,6 +114,13 @@ export function AppLayout() {
             external
           />
           <CNavLink
+            to="https://drive.google.com/drive/folders/1J6WqC8ZL57_cKZNBVh6YP5StXt0D0F5L?usp=sharing"
+            label="Deliverables + Jar"
+            leftSection={<FaGithub />}
+            rightSection={<FaExternalLinkAlt opacity={0.5} />}
+            external
+          />
+          <CNavLink
             to="/arch1"
             label="Arch1"
             leftSection={<MdArchitecture />}
