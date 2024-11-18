@@ -2,9 +2,10 @@
 
 ## Members
 
-- Tommy Cavill
-- Perry Cheng
-- Alex Chestnutt
-- Abbie Ellett
-- Natalie Kuper
-- Mia Moir
+- Aiden Sayer
+- Lurvïsh Polodoo
+- Ben Salkield
+- Oliver Rogers
+- Alex Sharman
+- William Roebuck
+- Kiyan Eiles
