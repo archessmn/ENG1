@@ -152,7 +152,8 @@ public class Main extends ApplicationAdapter {
 
         font = world.font;
 
-        fullScreen = true;
+        // defaults the
+        fullScreen = false;
 
         button.addListener(new ClickListener() {
             @Override
@@ -178,14 +179,17 @@ public class Main extends ApplicationAdapter {
     private void input() {
         if (Gdx.input.isKeyJustPressed(Input.Keys.P)) paused = !paused;
 
-
+        // Toggles fullscreen when F11 is pressed
         if (Gdx.input.isKeyJustPressed(Input.Keys.F11)){
             fullScreen = !fullScreen;
             Graphics.DisplayMode currentMode = Gdx.graphics.getDisplayMode();
-            if (fullScreen)
-                Gdx.graphics.setWindowedMode(960, 540);
-            else
+            if (fullScreen) {
                 Gdx.graphics.setFullscreenMode(currentMode);
+            }
+            else {
+
+                Gdx.graphics.setWindowedMode(960, 540);
+            }
         }
         if (paused || gameEnded) {
             buildingClicked = -1;
@@ -232,6 +236,7 @@ public class Main extends ApplicationAdapter {
 
         gameTimer += delta;
 
+        // Ends the game when the timer exceeds 5 minutes
         if (gameTimer >= 300) {
             gameEnded = true;
         }
@@ -276,6 +281,9 @@ public class Main extends ApplicationAdapter {
         }
 
         world.drawBuildings();
+        // Draws a 5-minute countdown timer for the games length
+        // If it's a whole minute, it displays :00 for the seconds
+        // Otherwise it gets the remainder of gameTimer divided by 60 for the seconds.
         if (60 - (int) gameTimer % 60 == 60) {
             countDownLabel.setText(floorDiv(300 - (int) gameTimer, 60) + ":00");
         }
