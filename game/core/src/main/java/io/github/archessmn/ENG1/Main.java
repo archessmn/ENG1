@@ -51,7 +51,6 @@ public class Main extends ApplicationAdapter {
     Vector2 unprojectedTouchPos;
 
     Array<Building> draggableBuildings;
-//    Array<Building> buildings;
 
     float gameTimer;
 
@@ -191,7 +190,7 @@ public class Main extends ApplicationAdapter {
                 Gdx.graphics.setWindowedMode(960, 540);
             }
         }
-        if (paused || gameEnded) {
+        if (gameEnded) {
             buildingClicked = -1;
             return;
         }
@@ -261,8 +260,8 @@ public class Main extends ApplicationAdapter {
                 shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
             }
             shapeRenderer.setColor(Color.RED);
-            Vector2 buldingCoords = building.getRawGridCoords();
-            shapeRenderer.rect(buldingCoords.x - (building.width / 2), buldingCoords.y - (building.height / 2), building.width, building.height);
+            Vector2 buildingCoords = building.getRawGridCoords();
+            shapeRenderer.rect(buildingCoords.x - (building.width / 2), buildingCoords.y - (building.height / 2), building.width, building.height);
             shapeRenderer.end();
         }
 
