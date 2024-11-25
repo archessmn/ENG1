@@ -51,7 +51,6 @@ public class Main extends ApplicationAdapter {
     Vector2 unprojectedTouchPos;
 
     Array<Building> draggableBuildings;
-//    Array<Building> buildings;
 
     float gameTimer;
 
@@ -129,7 +128,6 @@ public class Main extends ApplicationAdapter {
         touchPos = new Vector2();
         unprojectedTouchPos = new Vector2();
 
-//        buildings = new Array<>();
         draggableBuildings = new Array<>();
 
 
@@ -178,8 +176,7 @@ public class Main extends ApplicationAdapter {
     private void input() {
         if (Gdx.input.isKeyJustPressed(Input.Keys.P)) paused = !paused;
 
-
-        if (Gdx.input.isKeyJustPressed(Input.Keys.F11)){
+        if (Gdx.input.isKeyJustPressed(Input.Keys.F11)) {
             fullScreen = !fullScreen;
             Graphics.DisplayMode currentMode = Gdx.graphics.getDisplayMode();
             if (fullScreen)
@@ -187,10 +184,11 @@ public class Main extends ApplicationAdapter {
             else
                 Gdx.graphics.setFullscreenMode(currentMode);
         }
-        if (paused || gameEnded) {
+        if (gameEnded) {
             buildingClicked = -1;
             return;
         }
+
 
         touchPos.set(Gdx.input.getX(), Gdx.input.getY());
         unprojectedTouchPos.set(viewport.unproject(touchPos));
@@ -256,8 +254,8 @@ public class Main extends ApplicationAdapter {
                 shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
             }
             shapeRenderer.setColor(Color.RED);
-            Vector2 buldingCoords = building.getRawGridCoords();
-            shapeRenderer.rect(buldingCoords.x - (building.width / 2), buldingCoords.y - (building.height / 2), building.width, building.height);
+            Vector2 buildingCoords = building.getRawGridCoords();
+            shapeRenderer.rect(buildingCoords.x - (building.width / 2), buildingCoords.y - (building.height / 2), building.width, building.height);
             shapeRenderer.end();
         }
 
