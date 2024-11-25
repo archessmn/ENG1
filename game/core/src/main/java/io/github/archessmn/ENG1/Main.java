@@ -47,7 +47,6 @@ public class Main extends ApplicationAdapter {
     Vector2 unprojectedTouchPos;
 
     Array<Building> draggableBuildings;
-//    Array<Building> buildings;
 
     float gameTimer;
 
@@ -121,7 +120,6 @@ public class Main extends ApplicationAdapter {
         touchPos = new Vector2();
         unprojectedTouchPos = new Vector2();
 
-//        buildings = new Array<>();
         draggableBuildings = new Array<>();
 
         draggableBuildings.add(new GymBuilding(world, 660, 40, true));
@@ -166,8 +164,7 @@ public class Main extends ApplicationAdapter {
     private void input() {
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) paused = !paused;
 
-        if (paused || gameEnded) {
-            buildingClicked = -1;
+        if (gameEnded) {
             return;
         }
 
