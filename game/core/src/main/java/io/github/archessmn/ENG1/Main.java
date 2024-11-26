@@ -6,8 +6,9 @@ import com.badlogic.gdx.Graphics;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.*;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
@@ -19,8 +20,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
-import io.github.archessmn.ENG1.Buildings.*;
-import io.github.archessmn.ENG1.Buildings.Building;
+import io.github.archessmn.ENG1.GameModel.*;
 
 
 import java.util.HashMap;
@@ -45,6 +45,8 @@ public class Main extends ApplicationAdapter {
     ShapeRenderer shapeRenderer;
     ShapeRenderer blockRenderer;
 
+    SpriteBatch batch;
+
     FitViewport viewport;
 
     Vector2 touchPos;
@@ -57,7 +59,7 @@ public class Main extends ApplicationAdapter {
     Rectangle buildingRectangle;
     BitmapFont font;
     Boolean isClicked = false;
-    Integer buildingClicked = -1;
+    Building buildingClicked = null;
 
     Boolean paused = true;
     Boolean gameEnded = false;
@@ -71,12 +73,11 @@ public class Main extends ApplicationAdapter {
     private final HashMap<Building.Use, Label> buildingUseNameLabels = new HashMap<>();
 
 
-
-
     @Override
     public void create() {
+        viewport = new FitViewport(VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
         // 300 here represents the pixel width of the UI on the right hand side
-        world = new World(VIEWPORT_WIDTH, VIEWPORT_HEIGHT, VIEWPORT_WIDTH - 300, VIEWPORT_HEIGHT);
+        world = new World(VIEWPORT_WIDTH - 300, VIEWPORT_HEIGHT);
 
         atlas = new TextureAtlas(Gdx.files.internal("ui/uiskin.atlas"));
         skin = new Skin(Gdx.files.internal("ui/uiskin.json"));
@@ -123,7 +124,28 @@ public class Main extends ApplicationAdapter {
         rightTable.add(new Label("onto the grid. Don't overlap them!", labelStyle)).left().top().row();
         rightTable.add(new Label("Gym  Halls  Lecture Hall  Office  Piazza", labelStyle)).expandX().expandY().bottom();
 
-        assetManager = world.assetManager;
+        assetManager = new AssetManager();
+
+        assetManager.load("gym.png", Texture.class);
+        assetManager.load("halls.png", Texture.class);
+        assetManager.load("lecturehall.png", Texture.class);
+        assetManager.load("offices.png", Texture.class);
+        assetManager.load("piazza.png", Texture.class);
+        assetManager.load("construction.png", Texture.class);
+        assetManager.load("missing_texture.png", Texture.class);
+
+        assetManager.finishLoading();
+
+        FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("ui/Arial.ttf"));
+        FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
+        parameter.size = (int) (0.05f * Gdx.graphics.getHeight());
+        font = generator.generateFont(parameter);
+        font.getData().setScale(viewport.getWorldHeight() / Gdx.graphics.getHeight());
+        generator.dispose();
+
+        shapeRenderer = new ShapeRenderer();
+        gridRenderer = new ShapeRenderer();
+        batch = new SpriteBatch();
 
         touchPos = new Vector2();
         unprojectedTouchPos = new Vector2();
@@ -133,23 +155,17 @@ public class Main extends ApplicationAdapter {
 
 
 
-        draggableBuildings.add(new GymBuilding(world, 660, 40, true));
-        draggableBuildings.add(new HallsBuilding(world, 720, 40, true));
-        draggableBuildings.add(new LectureHallBuilding(world, 780, 40, true));
-        draggableBuildings.add(new OfficeBuilding(world, 840, 40, true));
-        draggableBuildings.add(new PiazzaBuilding(world, 900, 40, true));
+        draggableBuildings.add(new GymBuilding(660, 40, true));
+        draggableBuildings.add(new HallsBuilding(720, 40, true));
+        draggableBuildings.add(new LectureHallBuilding(780, 40, true));
+        draggableBuildings.add(new OfficeBuilding(840, 40, true));
+        draggableBuildings.add(new PiazzaBuilding(900, 40, true));
 
         gameTimer = 0f;
 
-        shapeRenderer = world.shapeRenderer;
-        gridRenderer = world.gridRenderer;
         blockRenderer = new ShapeRenderer();
 
-        viewport = world.viewport;
-
         buildingRectangle = new Rectangle();
-
-        font = world.font;
 
         // defaults the
         fullScreen = false;
@@ -191,7 +207,7 @@ public class Main extends ApplicationAdapter {
             }
         }
         if (gameEnded) {
-            buildingClicked = -1;
+            buildingClicked = null;
             return;
         }
 
@@ -200,29 +216,23 @@ public class Main extends ApplicationAdapter {
 
         isClicked = Gdx.input.isTouched();
 
-        if (Gdx.input.justTouched()) {
+        if (Gdx.input.justTouched()) { // Start drag
             for (int i = draggableBuildings.size - 1; i >= 0; i--) {
                 Building building = draggableBuildings.get(i);
 
                 if (building.getBounds().contains(unprojectedTouchPos)) {
-                    buildingClicked = world.addBuilding(building.makeCopy());
+                    buildingClicked = building.makeCopy();
                     break;
                 }
             }
-        } else if (!isClicked && buildingClicked != -1) {
-            Building building = world.getBuilding(buildingClicked);
+        } else if (!isClicked && buildingClicked != null) { // Click released
+            world.addBuilding(buildingClicked); // Places the building if it passes all checks
 
-            boolean placeSuccess = building.place();
-
-            if (!placeSuccess) {
-                world.buildings.removeIndex(buildingClicked);
-            }
-
-            buildingClicked = -1;
+            buildingClicked = null;
         }
 
-        if (buildingClicked != -1) {
-            world.getBuilding(buildingClicked).setCenter(touchPos.x, touchPos.y);
+        if (buildingClicked != null) { // Track building to mouse position for drag
+            buildingClicked.setCenter(touchPos.x, touchPos.y);
         }
     }
 
@@ -231,7 +241,7 @@ public class Main extends ApplicationAdapter {
 
         float delta = Gdx.graphics.getDeltaTime();
 
-        world.tickBuildings();
+        world.tickBuildings(delta);
 
         gameTimer += delta;
 
@@ -247,21 +257,20 @@ public class Main extends ApplicationAdapter {
         ScreenUtils.clear(Color.OLIVE);
         viewport.apply();
 
-        world.batch.setProjectionMatrix(viewport.getCamera().combined);
+        batch.setProjectionMatrix(viewport.getCamera().combined);
 
-        world.drawGrid();
+        drawGrid(shapeRenderer);
 
         // Draw red outline for where the logo will snap to
-        if (buildingClicked != -1) {
-            Building building = world.getBuilding(buildingClicked);
-            if (world.doesBuildingOverlap(building)) {
+        if (buildingClicked != null) {
+            if (world.doesBuildingOverlap(buildingClicked)) {
                 shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
             } else {
                 shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
             }
             shapeRenderer.setColor(Color.RED);
-            Vector2 buildingCoords = building.getRawGridCoords();
-            shapeRenderer.rect(buildingCoords.x - (building.width / 2), buildingCoords.y - (building.height / 2), building.width, building.height);
+            Vector2 buildingCoords = buildingClicked.getRawGridCoords();
+            shapeRenderer.rect(buildingCoords.x - (buildingClicked.width / 2), buildingCoords.y - (buildingClicked.height / 2), buildingClicked.width, buildingClicked.height);
             shapeRenderer.end();
         }
 
@@ -273,13 +282,10 @@ public class Main extends ApplicationAdapter {
 
         blockRenderer.end();
 
-        world.batch.begin();
+        batch.begin();
 
-        for (Building building : draggableBuildings) {
-            building.draw(world.batch);
-        }
+        drawBuildings(batch, assetManager);
 
-        world.drawBuildings();
         // Draws a 5-minute countdown timer for the games length
         // If it's a whole minute, it displays :00 for the seconds
         // Otherwise it gets the remainder of gameTimer divided by 60 for the seconds.
@@ -291,23 +297,23 @@ public class Main extends ApplicationAdapter {
         }
 
         timerLabel.setText(String.format("Year: %d, Day: %d", (int) (gameTimer / 60) + 1, (int) ((gameTimer % 60) / (60 / (double) 365)) + 1));
-        if (buildingClicked != -1) {
+        if (buildingClicked != null) {
             if (world.doesBuildingOverlap(buildingClicked)) {
-                font.draw(world.batch, "Buildings overlap", 20, 520);
+                font.draw(batch, "Buildings overlap", 20, 520);
             }
         }
 
         if (paused) {
-            font.draw(world.batch, "Paused, press P to resume", 20, 460);
-            font.draw(world.batch, "Building icons from macrovector on Freepik", 0, 25);
+            font.draw(batch, "Paused, press P to resume", 20, 460);
+            font.draw(batch, "Building icons from macrovector on Freepik", 0, 25);
         }
 
         if (gameEnded) {
-            font.draw(world.batch, "End of the game!", 20, 460);
-            font.draw(world.batch, "Building icons from macrovector on Freepik", 0, 25);
+            font.draw(batch, "End of the game!", 20, 460);
+            font.draw(batch, "Building icons from macrovector on Freepik", 0, 25);
         }
 
-        world.batch.end();
+        batch.end();
 
         for (Building.Use use : Building.Use.values()) {
             buildingUseCountLabels.get(use).setText(world.buildingUseCounts.get(use));
@@ -316,8 +322,59 @@ public class Main extends ApplicationAdapter {
         stage.draw();
     }
 
+    public void drawBuildings(Batch batch, AssetManager assetManager) {
+        for (Building building : draggableBuildings) {
+            drawBuilding(batch, assetManager, building);
+        }
+        for (Building building : world.buildings) {
+            drawBuilding(batch, assetManager, building);
+        }
+    }
+
+    private static void drawBuilding(Batch batch, AssetManager assetManager, Building building) {
+        Sprite sprite = null;
+        if (building.timeUntilBuilt > 0 && !building.built) {
+            sprite = new Sprite(assetManager.get(building.unbuiltSpriteName, Texture.class));
+        }
+        else {
+            sprite = new Sprite(assetManager.get(building.spriteName, Texture.class));
+        }
+
+        sprite.setSize(building.width, building.height);
+        sprite.setPosition(building.x, building.y);
+        sprite.draw(batch);
+    }
+
+    /**
+     * Draws a grid into the viewport using the {@link ShapeRenderer} passed to it.
+     * @param gridRenderer The {@link ShapeRenderer} used to draw the grid.
+     */
+    public static void drawGrid(ShapeRenderer gridRenderer) {
+        gridRenderer.begin(ShapeRenderer.ShapeType.Line);
+
+        gridRenderer.setColor(new Color(0x5b7e13ff));
+
+        float gridWidth = (VIEWPORT_WIDTH / 16f);
+        float gridHeight = (VIEWPORT_HEIGHT / 9f);
+
+        for (int v = 1; v < 9; v++) {
+            gridRenderer.line(0, gridHeight * v, VIEWPORT_WIDTH - 300, gridHeight * v);
+        }
+
+        for (int h = 1; h < 11; h++) {
+            gridRenderer.line(gridWidth * h, 0, gridWidth * h, VIEWPORT_HEIGHT);
+        }
+
+        gridRenderer.end();
+
+    }
+
     @Override
     public void dispose() {
-        world.dispose();
+        shapeRenderer.dispose();
+        gridRenderer.dispose();
+        batch.dispose();
+        font.dispose();
+        assetManager.dispose();
     }
 }

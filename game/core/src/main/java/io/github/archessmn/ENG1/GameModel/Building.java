@@ -1,8 +1,6 @@
-package io.github.archessmn.ENG1.Buildings;
+package io.github.archessmn.ENG1.GameModel;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
@@ -12,7 +10,7 @@ import io.github.archessmn.ENG1.Util.GridUtils;
 import io.github.archessmn.ENG1.World;
 
 /**
- * Base class for each building type ({@link io.github.archessmn.ENG1.Buildings.Building.Type}),
+ * Base class for each building type ({@link Building.Type}),
  * stores information about the building and provides utility classes for interacting with it.
  */
 public class Building {
@@ -22,16 +20,19 @@ public class Building {
     public int gridX;
     public int gridY;
 
-    public final int id;
-
     public float width;
     public float height;
+
+    public boolean built;
+
+    public final String spriteName;
+    public String unbuiltSpriteName;
 
     public float initialBuildTime;
     public float timeUntilBuilt;
 
     private boolean placed = false;
-    private boolean built;
+
 
     /**
      * Defines the type and, by inference, the {@link Use}
@@ -52,13 +53,10 @@ public class Building {
 
     public Rectangle bounds;
 
-    private final Sprite sprite;
-    private Sprite unbuiltSprite;
-    private final World world;
+
 
     /**
      * Initialises a new building.
-     * @param world The {@link World} that the building is a part of.
      * @param buildingType The {@link Type} of the building.
      * @param x The X coordinate to place the building at.
      * @param y The Y coordinate to place the building at.
@@ -67,8 +65,7 @@ public class Building {
      * @param timeUntilBuilt Time until the building is marked as built.
      * @param built Whether the building should be marked as built upon creation.
      */
-    public Building(World world, Type buildingType, float x, float y, float width, float height, float timeUntilBuilt, boolean built) {
-        this.id = world.buildings.size - 1;
+    public Building(Type buildingType, float x, float y, float width, float height, float timeUntilBuilt, boolean built) {
 
         this.x = x;
         this.y = y;
@@ -82,40 +79,20 @@ public class Building {
         this.built = built;
 
         if (timeUntilBuilt > 0) {
-            this.unbuiltSprite = new Sprite(world.assetManager.get("construction.png", Texture.class));
-            this.unbuiltSprite.setSize(width, height);
+            this.unbuiltSpriteName = "construction.png";
         }
 
-        String spriteFileName = switch (buildingType) {
+        spriteName = switch (buildingType) {
             case GYM -> "gym.png";
             case HALLS -> "halls.png";
             case LECTURE_HALL -> "lecturehall.png";
             case OFFICES -> "offices.png";
             case PIAZZA -> "piazza.png";
         };
-        this.sprite = new Sprite(world.assetManager.get(spriteFileName, Texture.class));
-        this.sprite.setSize(width, height);
-
-        this.world = world;
 
         this.buildingType = buildingType;
 
         this.bounds = new Rectangle(this.x, this.y, this.width, this.height);
-    }
-
-    /**
-     * Draws the building into the game using the provided {@link SpriteBatch}.
-     * @param batch The {@link SpriteBatch} to use to draw the building.
-     */
-    public void draw(SpriteBatch batch) {
-        if (timeUntilBuilt > 0 && !built) {
-            unbuiltSprite.setPosition(x, y);
-            unbuiltSprite.draw(batch);
-            return;
-        }
-        sprite.setPosition(this.x, this.y);
-
-        sprite.draw(batch);
     }
 
     /**
@@ -124,40 +101,23 @@ public class Building {
      * @param deltaTime The amount of time to advance by.
      */
     public void tick(float deltaTime) {
-        this.setX(MathUtils.clamp(this.x, 0, world.width - this.width));
-        this.setY(MathUtils.clamp(this.y, 0, world.height - this.height));
-
-        if (placed && timeUntilBuilt >= 0) this.timeUntilBuilt -= deltaTime;
-        if (timeUntilBuilt <= 0) built = true;
+        if (placed && timeUntilBuilt >= 0)
+            this.timeUntilBuilt -= deltaTime;
+        if (timeUntilBuilt <= 0)
+            built = true;
     }
 
     /**
-     * Usually called once per frame to run any updates the building may need,
-     * such as reducing time until built. Uses Gdx.graphics.getDeltaTime() to
-     * get the amount of time to advance by.
-     */
-    public void tick() {
-        tick(Gdx.graphics.getDeltaTime());
-    }
-
-    /**
-     * Called when placing the building into the world, will check if the building
-     * overlaps and cancel if it does, returning false. Will snap the building to
+     * Called when placing the building into the world, will snap the building to
      * the grid and update its grid coordinates to match its position.
-     * @return true if placing the building was successful.
      */
-    public boolean place() {
-        if (world.doesBuildingOverlap(this)) {
-            return false;
-        }
+    public void place() {
         this.snapToGrid();
         GridCoordTuple gridCoord = GridUtils.getGridCoords(this.x, this.y);
         this.gridX = gridCoord.x;
         this.gridY = gridCoord.y;
 
         this.placed = true;
-
-        return true;
     }
 
     /**
@@ -199,7 +159,7 @@ public class Building {
      * @return A copy of the building.
      */
     public Building makeCopy() {
-        return new Building(this.world, this.buildingType, this.x, this.y + 60, this.width, this.height, this.initialBuildTime, false);
+        return new Building(this.buildingType, this.x, this.y + 60, this.width, this.height, this.initialBuildTime, false);
     }
 
     /**

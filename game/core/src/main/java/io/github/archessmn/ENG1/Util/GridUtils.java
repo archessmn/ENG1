@@ -13,30 +13,6 @@ import static io.github.archessmn.ENG1.Main.VIEWPORT_WIDTH;
  */
 public class GridUtils {
     /**
-     * Draws a grid into the viewport using the {@link ShapeRenderer} passed to it.
-     * @param gridRenderer The {@link ShapeRenderer} used to draw the grid.
-     */
-    public static void drawGrid(ShapeRenderer gridRenderer) {
-        gridRenderer.begin(ShapeRenderer.ShapeType.Line);
-
-        gridRenderer.setColor(new Color(0x5b7e13ff));
-
-        float gridWidth = (VIEWPORT_WIDTH / 16f);
-        float gridHeight = (VIEWPORT_HEIGHT / 9f);
-
-        for (int v = 1; v < 9; v++) {
-            gridRenderer.line(0, gridHeight * v, VIEWPORT_WIDTH - 300, gridHeight * v);
-        }
-
-        for (int h = 1; h < 11; h++) {
-            gridRenderer.line(gridWidth * h, 0, gridWidth * h, VIEWPORT_HEIGHT);
-        }
-
-        gridRenderer.end();
-
-    }
-
-    /**
      * Get the raw coordinates of the grid square the given coordinates would snap to.
      * @param x The center X coordinate of the object
      * @param y The center Y coordinate of the object
