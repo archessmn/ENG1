@@ -1,4 +1,4 @@
-package io.github.archessmn.ENG1;
+package io.github.archessmn.ENG1.Interface;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
@@ -21,6 +21,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import io.github.archessmn.ENG1.GameModel.*;
+import io.github.archessmn.ENG1.GameModel.World;
 
 
 import java.util.HashMap;

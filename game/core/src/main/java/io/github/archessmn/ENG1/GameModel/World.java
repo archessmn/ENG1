@@ -1,17 +1,6 @@
-package io.github.archessmn.ENG1;
+package io.github.archessmn.ENG1.GameModel;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.assets.AssetManager;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.viewport.FitViewport;
-import io.github.archessmn.ENG1.GameModel.Building;
-import io.github.archessmn.ENG1.Util.GridCoordTuple;
-import io.github.archessmn.ENG1.Util.GridUtils;
 
 import java.util.HashMap;
 
