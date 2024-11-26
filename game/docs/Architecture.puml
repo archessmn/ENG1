@@ -3,25 +3,17 @@ allowmixing
 
 Package "Game model" {
     class World {
-        viewport
-        assetManager
-        shapeRenderer
-        gridRenderer
-        spriteBatch
-        font
         width
         height
-        buildings
+        'buildings
         buildingUseCounts
-        drawGrid()
         addBuilding(building)
         tickBuildings()
-        drawBuildings()
         getBuilding(id)
         doesBuildingOverlap(id)
+        calculateScore()
     }
     class GridUtils {
-        drawGrid()
         getRawGridCoords(x, y)
         getGridCoords()
     }
@@ -39,16 +31,16 @@ Package "Game model" {
         built
         buildingType
         bounds
-        sprite
-        unbuiltSprite
-        draw()
+        spritePath
+        unbuiltSpritePath
         tick(deltaTime)
         place()
-        setCenter()
-        getBounds()
+        'Note that these are still included, they just shouldn't have been in this diagram
+        'setCenter()
+        'getBounds()
+        'getRawGridCoords()
+        'getGridCoords()
         makeCopy()
-        getRawGridCoords()
-        getGridCoords()
         snapToGrid()
     }
     class GymBuilding
@@ -57,17 +49,31 @@ Package "Game model" {
     class OfficeBuilding
     class PiazzaBuilding
 
-    class EventManager
-    class Event
+    class EventManager {
+        processEvents(deltaTime)
+    }
+    class GameEvent {
+        title
+        description
+        rarity
+        modifiers
+    }
 
-    class AchievementManager
-    class Achievement
+    class AchievementManager {
+        assignAchievementListener()
+    }
+    class Achievement {
+        title
+        description
+    }
 }
 
 Package "Interface" {
     class Main {
-    render()
-    input()
+        render()
+        input()
+        drawBuildings()
+        drawGrid()
     }
 }
 
@@ -84,7 +90,7 @@ World -- Building
 World -- EventManager
 World -- AchievementManager
 
-Event -- EventManager
+GameEvent -- EventManager
 Achievement -- AchievementManager
 
 Building -- GymBuilding
