@@ -1,0 +1,96 @@
+@startuml
+allowmixing
+
+Package "Game model" {
+    class World {
+        viewport
+        assetManager
+        shapeRenderer
+        gridRenderer
+        spriteBatch
+        font
+        width
+        height
+        buildings
+        buildingUseCounts
+        drawGrid()
+        addBuilding(building)
+        tickBuildings()
+        drawBuildings()
+        getBuilding(id)
+        doesBuildingOverlap(id)
+    }
+    class GridUtils {
+        drawGrid()
+        getRawGridCoords(x, y)
+        getGridCoords()
+    }
+
+    class Building {
+        x
+        y
+        gridX
+        gridY
+        width
+        height
+        initialBuildTime
+        timeUntilBuilt
+        placed
+        built
+        buildingType
+        bounds
+        sprite
+        unbuiltSprite
+        draw()
+        tick(deltaTime)
+        place()
+        setCenter()
+        getBounds()
+        makeCopy()
+        getRawGridCoords()
+        getGridCoords()
+        snapToGrid()
+    }
+    class GymBuilding
+    class HallsBuilding
+    class LectureHallBuilding
+    class OfficeBuilding
+    class PiazzaBuilding
+
+    class EventManager
+    class Event
+
+    class AchievementManager
+    class Achievement
+}
+
+Package "Interface" {
+    class Main {
+    render()
+    input()
+    }
+}
+
+Package "LibGDX" {
+    component "LibGDX input handling"
+    component "LibGDX rendering functions"
+ }
+
+Main -- World
+"LibGDX" -- Main
+
+World -- GridUtils
+World -- Building
+World -- EventManager
+World -- AchievementManager
+
+Event -- EventManager
+Achievement -- AchievementManager
+
+Building -- GymBuilding
+Building -- HallsBuilding
+Building -- LectureHallBuilding
+Building -- OfficeBuilding
+Building -- PiazzaBuilding
+
+@enduml
