@@ -2,6 +2,7 @@ package io.github.archessmn.ENG1;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Graphics;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Color;
@@ -21,7 +22,10 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import io.github.archessmn.ENG1.Buildings.*;
 import io.github.archessmn.ENG1.Buildings.Building;
 
+
 import java.util.HashMap;
+
+import static java.lang.Math.floorDiv;
 
 /**
  * {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms.
@@ -57,13 +61,17 @@ public class Main extends ApplicationAdapter {
 
     Boolean paused = true;
     Boolean gameEnded = false;
+    Boolean fullScreen = false;
 
     private Stage stage;
     private Table rightTable;
-
+    private Label countDownLabel;
     private Label timerLabel;
     private final HashMap<Building.Use, Label> buildingUseCountLabels = new HashMap<>();
     private final HashMap<Building.Use, Label> buildingUseNameLabels = new HashMap<>();
+
+
+
 
     @Override
     public void create() {
@@ -77,7 +85,7 @@ public class Main extends ApplicationAdapter {
         Label.LabelStyle labelStyle = skin.get(Label.LabelStyle.class);
         TextButtonStyle textButtonStyle = skin.get(TextButtonStyle.class);
 
-        Label label = new Label("ENG1 CH2 GRP3 UniSim", labelStyle);
+        countDownLabel = new Label("Timer", labelStyle);
         timerLabel = new Label("Timer", labelStyle);
 
         for (Building.Use buildingUse : Building.Use.values()) {
@@ -104,7 +112,7 @@ public class Main extends ApplicationAdapter {
 
         rootTable.right().add(rightTable).expandY().fillY().width(300);
 
-        rightTable.add(label).row();
+        rightTable.add(countDownLabel).row();
         rightTable.add(timerLabel).row();
         for (Building.Use buildingUse : Building.Use.values()) {
             rightTable.add(buildingUseNameLabels.get(buildingUse)).left();
@@ -120,7 +128,10 @@ public class Main extends ApplicationAdapter {
         touchPos = new Vector2();
         unprojectedTouchPos = new Vector2();
 
+//        buildings = new Array<>();
         draggableBuildings = new Array<>();
+
+
 
         draggableBuildings.add(new GymBuilding(world, 660, 40, true));
         draggableBuildings.add(new HallsBuilding(world, 720, 40, true));
@@ -139,6 +150,9 @@ public class Main extends ApplicationAdapter {
         buildingRectangle = new Rectangle();
 
         font = world.font;
+
+        // defaults the
+        fullScreen = false;
 
         button.addListener(new ClickListener() {
             @Override
@@ -162,9 +176,22 @@ public class Main extends ApplicationAdapter {
     }
 
     private void input() {
-        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) paused = !paused;
+        if (Gdx.input.isKeyJustPressed(Input.Keys.P)) paused = !paused;
 
+        // Toggles fullscreen when F11 is pressed
+        if (Gdx.input.isKeyJustPressed(Input.Keys.F11)){
+            fullScreen = !fullScreen;
+            Graphics.DisplayMode currentMode = Gdx.graphics.getDisplayMode();
+            if (fullScreen) {
+                Gdx.graphics.setFullscreenMode(currentMode);
+            }
+            else {
+
+                Gdx.graphics.setWindowedMode(960, 540);
+            }
+        }
         if (gameEnded) {
+            buildingClicked = -1;
             return;
         }
 
@@ -208,6 +235,7 @@ public class Main extends ApplicationAdapter {
 
         gameTimer += delta;
 
+        // Ends the game when the timer exceeds 5 minutes
         if (gameTimer >= 300) {
             gameEnded = true;
         }
@@ -252,6 +280,15 @@ public class Main extends ApplicationAdapter {
         }
 
         world.drawBuildings();
+        // Draws a 5-minute countdown timer for the games length
+        // If it's a whole minute, it displays :00 for the seconds
+        // Otherwise it gets the remainder of gameTimer divided by 60 for the seconds.
+        if (60 - (int) gameTimer % 60 == 60) {
+            countDownLabel.setText(floorDiv(300 - (int) gameTimer, 60) + ":00");
+        }
+        else {
+            countDownLabel.setText(floorDiv(300 - (int) gameTimer, 60) + ":" + String.format("%02d", 60 - (int) gameTimer % 60));
+        }
 
         timerLabel.setText(String.format("Year: %d, Day: %d", (int) (gameTimer / 60) + 1, (int) ((gameTimer % 60) / (60 / (double) 365)) + 1));
         if (buildingClicked != -1) {
@@ -261,7 +298,7 @@ public class Main extends ApplicationAdapter {
         }
 
         if (paused) {
-            font.draw(world.batch, "Paused, press [ESC] to resume", 20, 460);
+            font.draw(world.batch, "Paused, press P to resume", 20, 460);
             font.draw(world.batch, "Building icons from macrovector on Freepik", 0, 25);
         }
 
