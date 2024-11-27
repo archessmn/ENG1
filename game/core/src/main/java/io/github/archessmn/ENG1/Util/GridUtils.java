@@ -25,7 +25,7 @@ public class GridUtils {
         float gridHeight = (VIEWPORT_HEIGHT / 9f);
 
         for (int v = 1; v < 9; v++) {
-            gridRenderer.line(0, gridHeight * v, VIEWPORT_WIDTH - 300, gridHeight * v);
+            gridRenderer.line(0, gridHeight * v, VIEWPORT_WIDTH - 3, gridHeight * v);
         }
 
         for (int h = 1; h < 11; h++) {

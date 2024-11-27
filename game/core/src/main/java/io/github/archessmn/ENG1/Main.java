@@ -1,11 +1,9 @@
 package io.github.archessmn.ENG1;
 
-import com.badlogic.gdx.ApplicationAdapter;
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Graphics;
-import com.badlogic.gdx.Input;
+import com.badlogic.gdx.*;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -30,7 +28,7 @@ import static java.lang.Math.floorDiv;
 /**
  * {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms.
  */
-public class Main extends ApplicationAdapter {
+public class Main implements Screen {
     public static final Integer VIEWPORT_WIDTH = 960;
     public static final Integer VIEWPORT_HEIGHT = 540;
 
@@ -70,11 +68,16 @@ public class Main extends ApplicationAdapter {
     private final HashMap<Building.Use, Label> buildingUseCountLabels = new HashMap<>();
     private final HashMap<Building.Use, Label> buildingUseNameLabels = new HashMap<>();
 
+    final ScreenManager game;
 
 
+
+    public Main(ScreenManager main) {
+        this.game = main;
+    }
 
     @Override
-    public void create() {
+    public void show() {
         // 300 here represents the pixel width of the UI on the right hand side
         world = new World(VIEWPORT_WIDTH, VIEWPORT_HEIGHT, VIEWPORT_WIDTH - 300, VIEWPORT_HEIGHT);
 
@@ -163,7 +166,7 @@ public class Main extends ApplicationAdapter {
     }
 
     @Override
-    public void render() {
+    public void render(float v) {
         input();
         logic();
         draw();
@@ -178,18 +181,6 @@ public class Main extends ApplicationAdapter {
     private void input() {
         if (Gdx.input.isKeyJustPressed(Input.Keys.P)) paused = !paused;
 
-        // Toggles fullscreen when F11 is pressed
-        if (Gdx.input.isKeyJustPressed(Input.Keys.F11)){
-            fullScreen = !fullScreen;
-            Graphics.DisplayMode currentMode = Gdx.graphics.getDisplayMode();
-            if (fullScreen) {
-                Gdx.graphics.setFullscreenMode(currentMode);
-            }
-            else {
-
-                Gdx.graphics.setWindowedMode(960, 540);
-            }
-        }
         if (gameEnded) {
             buildingClicked = -1;
             return;
@@ -319,5 +310,20 @@ public class Main extends ApplicationAdapter {
     @Override
     public void dispose() {
         world.dispose();
+    }
+
+    @Override
+    public void pause() {
+
+    }
+
+    @Override
+    public void resume() {
+
+    }
+
+    @Override
+    public void hide() {
+
     }
 }
